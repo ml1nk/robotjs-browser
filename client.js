@@ -1,6 +1,6 @@
 var robotjs = (function() {
     var origin = _origin(document.getElementById("robotjs-browser").src);
-    var socket = io(_origin());
+    var socket = io(origin);
 
     var pos = (function() {
 
