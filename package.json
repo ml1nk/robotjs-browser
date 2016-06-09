@@ -5,7 +5,7 @@
     "javascript",
     "browser"
   ],
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Marcel Link <marcel.link@t-online.de>",
   "repository": {
     "type": "git",
@@ -37,6 +37,6 @@
   "scripts": {
     "start": "node server.js"
   },
-  "main": "client.js",
+  "main": "server.js",
   "devDependencies": {}
 }
