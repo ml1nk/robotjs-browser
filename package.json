@@ -1,0 +1,42 @@
+{
+  "name": "robotjs-browser",
+  "description": "Control mouse and keyboard from inside a browser with robotjs.",
+  "keywords": [
+    "javascript",
+    "browser"
+  ],
+  "version": "0.1.0",
+  "author": "Marcel Link <marcel.link@t-online.de>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ml1nk/robotjs-browser.git"
+  },
+  "bugs": {
+    "url": "http://github.com/ml1nk/robotjs-browser/issues"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "robotjs": "^0.4.4",
+    "socket.io": "^1.4.5",
+    "commander": "^2.6.0",
+    "express": "^4.13.4",
+    "http": "^0.0.0"
+  },
+  "files": [
+    "lib",
+    "README.md",
+    "LICENSE.md",
+    "package.json",
+    "server.js",
+    "client.js",
+    "demo.html"
+  ],
+  "bin": {
+    "robotjs-browser": "./server.js"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "main": "client.js",
+  "devDependencies": {}
+}
