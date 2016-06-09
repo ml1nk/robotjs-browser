@@ -14,8 +14,6 @@
             var input = document.getElementById("input");
             input.value = "LoremIpsum";
             document.getElementById("start").addEventListener('click', function() {
-                var p = document.getElementsByTagName("p");
-                var input = document.getElementById("input");
                 robotjs.fullscreen.enable().then(function() {
                     var pos = robotjs.pos.textNode(p[0].firstChild, 7);
                     return robotjs.wrapper.moveMouseSmooth(pos.x, pos.y);

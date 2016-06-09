@@ -16,6 +16,7 @@ var robotjs = (function() {
             }
             var pos = _site(bounding, site);
             _iframe_pos(el, pos);
+            _screen_pos(pos);
             return pos;
         }
 
@@ -32,6 +33,11 @@ var robotjs = (function() {
                     }
                 }
             }
+        }
+
+        function _screen_pos(pos) {
+          pos.x += window.screenX + (window.outerWidth-window.innerWidth);
+          pos.y += window.screenY + (window.outerHeight-window.innerHeight);
         }
 
         /*
@@ -82,6 +88,7 @@ var robotjs = (function() {
                 y: bounding.top+Math.round((bounding.bottom-bounding.top)/2),
             };
             _iframe_pos(el, pos);
+            _screen_pos(pos);
             return pos;
         }
 
@@ -93,7 +100,7 @@ var robotjs = (function() {
 
     var fullscreen = (function() {
         function is() {
-            return (screen.height === window.outerHeight && screen.width === window.outerWidth);
+            return (screen.height === window.outerHeight && screen.width === window.outerWidth && window.outerWidth - window.innerWidth <= 5 && window.outerHeight - window.innerHeight <= 5);
         }
 
         function toggle() {
