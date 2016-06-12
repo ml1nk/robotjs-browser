@@ -14,8 +14,7 @@ var robotjs = (function() {
             } else {
                 bounding = el.getBoundingClientRect();
             }
-            var pos = _site(bounding, site);
-            _devicePixelRatio_pos(el.ownerDocument.defaultView, pos);
+            var pos = _pos(bounding, el.ownerDocument.defaultView, site);
             _iframe_pos(el, pos);
             _screen_pos(pos);
             return pos;
@@ -25,12 +24,7 @@ var robotjs = (function() {
             var range = el.ownerDocument.createRange();
             range.setStart(el, offset);
             range.setEnd(el, offset);
-            var bounding = range.getBoundingClientRect();
-            var pos = {
-                x: bounding.left,
-                y: bounding.top + Math.round((bounding.bottom - bounding.top) / 2),
-            };
-            _devicePixelRatio_pos(el.ownerDocument.defaultView, pos);
+            var pos = _pos(range.getBoundingClientRect(), el.ownerDocument.defaultView, "left-center");
             _iframe_pos(el, pos);
             _screen_pos(pos);
             return pos;
@@ -42,21 +36,13 @@ var robotjs = (function() {
                 for (var i = 0; i < list.length; i++) {
                     var doc = list[i].contentDocument || list[i].contentWindow.document;
                     if (el.ownerDocument === doc) {
-                        var bounding = list[i].getBoundingClientRect();
-                        var pos_outside = { x : bounding.left, y : bounding.top};
-                        _devicePixelRatio_pos(window, pos_outside);
+                        var pos_outside = _pos(list[i].getBoundingClientRect(), window, "left-top");
                         pos.x += pos_outside.x;
                         pos.y += pos_outside.y;
                         break;
                     }
                 }
             }
-        }
-
-        function _devicePixelRatio_pos(window, pos) {
-          var devicePixelRatio = _getDevicePixelRatio(window);
-          pos.x = Math.round(pos.x*devicePixelRatio);
-          pos.y = Math.round(pos.y*devicePixelRatio);
         }
 
         function _screen_pos(pos) {
@@ -67,8 +53,15 @@ var robotjs = (function() {
               pos.x += Math.round(devicePixelRatio*window.mozInnerScreenX);
               pos.y += Math.round(devicePixelRatio*window.mozInnerScreenY);
             } else {
-              pos.x += window.screenX + (window.outerWidth - Math.round(window.innerWidth*devicePixelRatio));
-              pos.y += window.screenY + (window.outerHeight - Math.round(window.innerHeight*devicePixelRatio));
+              // There is no equivalent for other browsers from "mozInnerScreenX/Y"
+              var border;
+              if(window.hasOwnProperty("chrome")) {
+                border = Math.round(((window.outerWidth - Math.round(window.innerWidth*devicePixelRatio))/2));
+              } else {
+                border = Math.round((window.outerWidth - window.innerWidth)*devicePixelRatio/2);
+              }
+              pos.x += window.screenX + border;
+              pos.y += window.screenY + Math.round((window.outerHeight - window.innerHeight)*devicePixelRatio)-border;
             }
         }
 
@@ -77,7 +70,7 @@ var robotjs = (function() {
          *              left        center        right
          *              left-bottom bottom right-bottom
          */
-        function _site(bounding, site) {
+        function _pos(bounding, window, site) {
             var pos = {};
             switch (site) {
                 case "left":
@@ -91,7 +84,7 @@ var robotjs = (function() {
                     pos.x = bounding.right;
                     break;
                 default:
-                    pos.x = bounding.left + Math.round((bounding.right - bounding.left) / 2);
+                    pos.x = bounding.left + (bounding.right - bounding.left) / 2;
             }
             switch (site) {
                 case "top":
@@ -105,8 +98,11 @@ var robotjs = (function() {
                     pos.y = bounding.bottom;
                     break;
                 default:
-                    pos.y = bounding.top + Math.round((bounding.bottom - bounding.top) / 2);
+                    pos.y = bounding.top + (bounding.bottom - bounding.top) / 2;
             }
+            var devicePixelRatio = _getDevicePixelRatio(window);
+            pos.x = Math.round(pos.x*devicePixelRatio);
+            pos.y = Math.round(pos.y*devicePixelRatio);
             return pos;
         }
 

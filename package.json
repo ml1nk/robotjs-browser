@@ -3,9 +3,12 @@
   "description": "Control mouse and keyboard from inside a browser with robotjs.",
   "keywords": [
     "javascript",
-    "browser"
+    "browser",
+    "testing",
+    "unittest",
+    "uitest"
   ],
-  "version": "0.1.5",
+  "version": "0.1.6",
   "author": "Marcel Link <marcel.link@t-online.de>",
   "repository": {
     "type": "git",

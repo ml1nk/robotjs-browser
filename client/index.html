@@ -15,11 +15,11 @@
             select.addEventListener('click', function() {
                 write.disabled = true;
                 select.disabled = true;
-                var pos = robotjs.pos.textNode(p[0].firstChild, 7);
+                var pos = robotjs.pos.textNode(p[0].firstChild, 6);
                 robotjs.wrapper.moveMouseSmooth(pos.x, pos.y).then(function() {
                     return robotjs.wrapper.mouseToggle("down");
                 }).then(function() {
-                    var pos = robotjs.pos.textNode(p[7].firstChild, 10);
+                    var pos = robotjs.pos.textNode(p[7].firstChild, 11);
                     return robotjs.wrapper.moveMouseSmooth(pos.x, pos.y);
                 }).then(function() {
                     return robotjs.wrapper.mouseToggle("up");
