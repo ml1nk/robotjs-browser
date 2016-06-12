@@ -17,11 +17,12 @@
   "license": "MIT",
   "dependencies": {
     "robotjs": "^0.4.4",
-    "socket.io": "^1.4.5",
+    "socket.io": "^1.4.6",
     "commander": "^2.6.0",
     "express": "^4.13.4",
     "http": "^0.0.0",
-    "uglify-js": "^2.6.2"
+    "uglify-js": "^2.6.2",
+    "socket.io-client": "^1.4.6"
   },
   "files": [
     "lib",

@@ -26,7 +26,7 @@ var io = require('socket.io')(server, {
 var serve = {
     files: {
         "socket.io" : {
-          "path" : require.resolve("socket.io/node_modules/socket.io-client/socket.io.js")
+          "path" : require.resolve("socket.io-client/socket.io.js")
         },
         "setImmediate" : {
           "path" : __dirname + "/client/lib/setImmediate.js"
