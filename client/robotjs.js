@@ -120,7 +120,7 @@ var robotjs = (function() {
               return(Math.round(devicePixelRatio*window.mozInnerScreenX)<5 && Math.round(devicePixelRatio*window.mozInnerScreenY)<5);
             } else {
               // there is always one pixel at the top
-              return (screen.height-5 > window.innerHeight*devicePixelRatio && screen.width-5 > window.innerWidth*devicePixelRatio);
+              return (window.screen.height-5 < window.innerHeight*devicePixelRatio && window.screen.width-5 < window.innerWidth*devicePixelRatio);
             }
         }
 
