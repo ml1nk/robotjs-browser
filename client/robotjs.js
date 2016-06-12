@@ -46,22 +46,21 @@ var robotjs = (function() {
         }
 
         function _screen_pos(pos) {
+            var border;
             var devicePixelRatio = _getDevicePixelRatio(window);
             // firefox ignores decorations (title bar) window.outerWidth / window.outerHeight
             // https://bugzilla.mozilla.org/show_bug.cgi?id=581866
             if(window.hasOwnProperty("mozInnerScreenY") && window.hasOwnProperty("mozInnerScreenX")) {
               pos.x += Math.round(devicePixelRatio*window.mozInnerScreenX);
               pos.y += Math.round(devicePixelRatio*window.mozInnerScreenY);
-            } else {
-              // There is no equivalent for other browsers from "mozInnerScreenX/Y"
-              var border;
-              if(window.hasOwnProperty("chrome")) {
-                border = Math.round(((window.outerWidth - Math.round(window.innerWidth*devicePixelRatio))/2));
-              } else {
-                border = Math.round((window.outerWidth - window.innerWidth)*devicePixelRatio/2);
-              }
+            } else if(window.hasOwnProperty("chrome")) {
+              border = Math.round((window.outerWidth - Math.round(window.innerWidth*devicePixelRatio))/2);
               pos.x += window.screenX + border;
-              pos.y += window.screenY + Math.round((window.outerHeight - window.innerHeight)*devicePixelRatio)-border;
+              pos.y += window.screenY + window.outerHeight - Math.round(window.innerHeight*devicePixelRatio)-border;
+            } else {
+              border = Math.round((window.outerWidth - window.innerWidth)*devicePixelRatio/2);
+              pos.x += window.screenX*devicePixelRatio + border;
+              pos.y += window.screenY*devicePixelRatio + Math.round((window.outerHeight - window.innerHeight)*devicePixelRatio)-border;
             }
         }
 
