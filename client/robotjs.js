@@ -53,7 +53,7 @@ var robotjs = (function() {
             if(window.hasOwnProperty("mozInnerScreenY") && window.hasOwnProperty("mozInnerScreenX")) {
               pos.x += Math.round(devicePixelRatio*window.mozInnerScreenX);
               pos.y += Math.round(devicePixelRatio*window.mozInnerScreenY);
-            } else if(window.hasOwnProperty("chrome") && window.hasOwnProperty("screen") && !window.screen.hasOwnProperty("systemXDPI")) {
+            } else if(window.hasOwnProperty("chrome") && window.hasOwnProperty("screen") && !(window.screen.systemXDPI)) {
               border = Math.round((window.outerWidth - Math.round(window.innerWidth*devicePixelRatio))/2);
               pos.x += window.screenX + border;
               pos.y += window.screenY + window.outerHeight - Math.round(window.innerHeight*devicePixelRatio)-border;
