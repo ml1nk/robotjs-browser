@@ -4,35 +4,43 @@
 <head>
     <meta charset=utf-8 />
     <title>robotjs-browser - demo</title>
-    <script src="/socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="lib/promise.min.js"></script>
-    <script type="text/javascript" src="lib/setImmediate.min.js"></script>
-    <script id="robotjs-browser" type="text/javascript" src="robotjs-browser.js"></script>
+    <script id="robotjs" type="text/javascript" src="robotjs-polyfill.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var p = document.getElementsByTagName("p");
             var input = document.getElementById("input");
+            var write = document.getElementById("write");
+            var select = document.getElementById("select");
             input.value = "LoremIpsum";
-            document.getElementById("start").addEventListener('click', function() {
-                robotjs.fullscreen.enable().then(function() {
-                    var pos = robotjs.pos.textNode(p[0].firstChild, 7);
-                    return robotjs.wrapper.moveMouseSmooth(pos.x, pos.y);
-                }).then(function() {
+            select.addEventListener('click', function() {
+                write.disabled = true;
+                select.disabled = true;
+                var pos = robotjs.pos.textNode(p[0].firstChild, 7);
+                robotjs.wrapper.moveMouseSmooth(pos.x, pos.y).then(function() {
                     return robotjs.wrapper.mouseToggle("down");
                 }).then(function() {
                     var pos = robotjs.pos.textNode(p[7].firstChild, 10);
                     return robotjs.wrapper.moveMouseSmooth(pos.x, pos.y);
                 }).then(function() {
                     return robotjs.wrapper.mouseToggle("up");
-                }).then(robotjs.delay(2000)).then(function() {
-                    var pos = robotjs.pos.node(input, "center");
-                    return robotjs.wrapper.moveMouseSmooth(pos.x, pos.y);
-                }).then(function() {
+                }).then(function(){
+                  write.disabled = false;
+                  select.disabled = false;
+                });
+            });
+            write.addEventListener('click', function() {
+              write.disabled = true;
+              select.disabled = true;
+                var pos = robotjs.pos.node(input, "center");
+                robotjs.wrapper.moveMouseSmooth(pos.x, pos.y).then(function() {
                     return robotjs.wrapper.mouseClick("left", true);
                 }).then(function() {
                     return robotjs.wrapper.keyTap("backspace");
                 }).then(function() {
-                    return robotjs.wrapper.typeStringDelayed("Lorem ipsum dolor sit amet", 120);
+                    return robotjs.wrapper.typeStringDelayed("Lorem ipsum dolor sit amet", 500);
+                }).then(function(){
+                  write.disabled = false;
+                  select.disabled = false;
                 });
             });
         });
@@ -41,8 +49,10 @@
 
 <body>
     <div>
-        <button id="start" button>Start</button>
+        <button id="select" button>select</button>
+        <button id="write" button>write</button>
     </div>
+    <hr/>
     <div>
         <p>Lorem ipsum dolor sit amet, </p>
         <p>consetetur sadipscing elitr, </p>

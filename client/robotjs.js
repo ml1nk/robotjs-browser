@@ -1,5 +1,5 @@
 var robotjs = (function() {
-    var origin = _origin(document.getElementById("robotjs-browser").src);
+    var origin = _origin(document.getElementById("robotjs").src);
     var socket = io(origin);
 
     var pos = (function() {
@@ -15,6 +15,22 @@ var robotjs = (function() {
                 bounding = el.getBoundingClientRect();
             }
             var pos = _site(bounding, site);
+            _devicePixelRatio_pos(el.ownerDocument.defaultView, pos);
+            _iframe_pos(el, pos);
+            _screen_pos(pos);
+            return pos;
+        }
+
+        function textNode(el, offset) {
+            var range = el.ownerDocument.createRange();
+            range.setStart(el, offset);
+            range.setEnd(el, offset);
+            var bounding = range.getBoundingClientRect();
+            var pos = {
+                x: bounding.left,
+                y: bounding.top + Math.round((bounding.bottom - bounding.top) / 2),
+            };
+            _devicePixelRatio_pos(el.ownerDocument.defaultView, pos);
             _iframe_pos(el, pos);
             _screen_pos(pos);
             return pos;
@@ -26,18 +42,34 @@ var robotjs = (function() {
                 for (var i = 0; i < list.length; i++) {
                     var doc = list[i].contentDocument || list[i].contentWindow.document;
                     if (el.ownerDocument === doc) {
-                        var outside = list[i].getBoundingClientRect();
-                        pos.x += outside.left;
-                        pos.y += outside.top;
+                        var bounding = list[i].getBoundingClientRect();
+                        var pos_outside = { x : bounding.left, y : bounding.top};
+                        _devicePixelRatio_pos(window, pos_outside);
+                        pos.x += pos_outside.x;
+                        pos.y += pos_outside.y;
                         break;
                     }
                 }
             }
         }
 
+        function _devicePixelRatio_pos(window, pos) {
+          var devicePixelRatio = _getDevicePixelRatio(window);
+          pos.x = Math.round(pos.x*devicePixelRatio);
+          pos.y = Math.round(pos.y*devicePixelRatio);
+        }
+
         function _screen_pos(pos) {
-          pos.x += window.screenX + (window.outerWidth-window.innerWidth);
-          pos.y += window.screenY + (window.outerHeight-window.innerHeight);
+            var devicePixelRatio = _getDevicePixelRatio(window);
+            // firefox ignores decorations (title bar) window.outerWidth / window.outerHeight
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=581866
+            if(window.hasOwnProperty("mozInnerScreenY") && window.hasOwnProperty("mozInnerScreenX")) {
+              pos.x += Math.round(devicePixelRatio*window.mozInnerScreenX);
+              pos.y += Math.round(devicePixelRatio*window.mozInnerScreenY);
+            } else {
+              pos.x += window.screenX + (window.outerWidth - Math.round(window.innerWidth*devicePixelRatio));
+              pos.y += window.screenY + (window.outerHeight - Math.round(window.innerHeight*devicePixelRatio));
+            }
         }
 
         /*
@@ -59,7 +91,7 @@ var robotjs = (function() {
                     pos.x = bounding.right;
                     break;
                 default:
-                    pos.x = bounding.left + Math.round((bounding.right-bounding.left) / 2);
+                    pos.x = bounding.left + Math.round((bounding.right - bounding.left) / 2);
             }
             switch (site) {
                 case "top":
@@ -73,22 +105,8 @@ var robotjs = (function() {
                     pos.y = bounding.bottom;
                     break;
                 default:
-                    pos.y = bounding.top + Math.round((bounding.bottom-bounding.top) / 2);
+                    pos.y = bounding.top + Math.round((bounding.bottom - bounding.top) / 2);
             }
-            return pos;
-        }
-
-        function textNode(el, offset) {
-            var range = el.ownerDocument.createRange();
-            range.setStart(el, offset);
-            range.setEnd(el, offset);
-            var bounding = range.getBoundingClientRect();
-            var pos = {
-                x: bounding.left,
-                y: bounding.top+Math.round((bounding.bottom-bounding.top)/2),
-            };
-            _iframe_pos(el, pos);
-            _screen_pos(pos);
             return pos;
         }
 
@@ -100,12 +118,20 @@ var robotjs = (function() {
 
     var fullscreen = (function() {
         function is() {
-            return (screen.height === window.outerHeight && screen.width === window.outerWidth && window.outerWidth - window.innerWidth <= 5 && window.outerHeight - window.innerHeight <= 5);
+            var devicePixelRatio = _getDevicePixelRatio(window);
+            // firefox changes window.outerHeight / window.outerWidth when zooming (chrome does not)
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=1022006
+            if(window.hasOwnProperty("mozInnerScreenY") && window.hasOwnProperty("mozInnerScreenX")) {
+              return(Math.round(devicePixelRatio*window.mozInnerScreenX)<5 && Math.round(devicePixelRatio*window.mozInnerScreenY)<5);
+            } else {
+              // there is always one pixel at the top
+              return (screen.height-5 > window.innerHeight*devicePixelRatio && screen.width-5 > window.innerWidth*devicePixelRatio);
+            }
         }
 
         function toggle() {
             return new Promise(function(fulfill, reject) {
-              wrapper.keyTap("f11").then(delay(4000),reject).then(fulfill);
+                wrapper.keyTap("f11").then(delay(4000), reject).then(fulfill);
             });
         }
 
@@ -134,16 +160,11 @@ var robotjs = (function() {
     }());
 
     var wrapper = (function() {
-        var _id = 0;
 
-        // Übertragung des Funktionsaufrufs und der Rückgabe über socket.io
+        // transmit the wanted function to the server
         function _wormhole(name, parameter) {
             return new Promise(function(fulfill, reject) {
-                socket.once("robotjs." + _id, function(result) {
-                    fulfill(result);
-                });
-                socket.emit("robotjs", _id, name, parameter);
-                _id++;
+                socket.emit("robotjs", name, parameter, fulfill);
             });
         }
 
@@ -212,8 +233,7 @@ var robotjs = (function() {
             getMousePos: getMousePos,
             scrollMouse: scrollMouse,
             getPixelColor: getPixelColor,
-            getScreenSize: getScreenSize,
-            _id: _id
+            getScreenSize: getScreenSize
         };
 
     }());
@@ -235,20 +255,34 @@ var robotjs = (function() {
 
     // https://gist.github.com/jlong/2428561
     function _origin(url) {
-      var div = document.createElement('div');
-      div.innerHTML = "<a></a>";
-      div.firstChild.href = url; // Ensures that the href is properly escaped
-      div.innerHTML = div.innerHTML; // Run the current innerHTML back through the parser
-      return div.firstChild.origin;
+        var div = document.createElement('div');
+        div.innerHTML = "<a></a>";
+        div.firstChild.href = url; // Ensures that the href is properly escaped
+        div.innerHTML = div.innerHTML; // Run the current innerHTML back through the parser
+        return div.firstChild.origin;
+    }
+
+    /*! GetDevicePixelRatio | Author: Tyson Matanich, 2012 | License: MIT */
+    // https://github.com/tysonmatanich/GetDevicePixelRatio/blob/master/getDevicePixelRatio.js
+    function _getDevicePixelRatio(window) {
+        var ratio = 1;
+        // To account for zoom, change to use deviceXDPI instead of systemXDPI
+        if (window.screen.systemXDPI !== undefined && window.screen.logicalXDPI !== undefined && window.screen.systemXDPI > window.screen.logicalXDPI) {
+            // Only allow for values > 1
+            ratio = window.screen.systemXDPI / window.screen.logicalXDPI;
+        } else if (window.devicePixelRatio !== undefined) {
+            ratio = window.devicePixelRatio;
+        }
+        return ratio;
     }
 
     return {
-        pos : pos,
-        fullscreen : fullscreen,
-        wrapper : wrapper,
-        delay : delay,
-        socket : socket,
-        origin : origin
+        pos: pos,
+        fullscreen: fullscreen,
+        wrapper: wrapper,
+        delay: delay,
+        socket: socket,
+        origin: origin
     };
 
 }());

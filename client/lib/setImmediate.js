@@ -1,3 +1,4 @@
+// Source: https://github.com/YuzuJS/setImmediate, Version: 1.0.4, License: MIT
 (function (global, undefined) {
     "use strict";
 
