@@ -8,7 +8,7 @@
     "unittest",
     "uitest"
   ],
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": "Marcel Link <marcel.link@t-online.de>",
   "repository": {
     "type": "git",
@@ -32,9 +32,8 @@
     "README.md",
     "LICENSE.md",
     "package.json",
-    "server.js",
-    "client",
-    "demo.html"
+    "robotjs-browser.js",
+    "client"
   ],
   "bin": {
     "robotjs-browser": "./robotjs-browser.js"
