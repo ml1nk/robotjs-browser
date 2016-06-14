@@ -15,12 +15,12 @@ var robotjs = (function() {
 
       var html = '<body>Foo</body>';
       i.style.display = 'none';
+      document.body.appendChild(i);
       i.onload = function() {
         window.robotjs = (i.contentWindow || i.contentDocument.defaultView).robotjs;
         window.robotjs.setWindow(window);
         window.robotjs.started.then(_fulfill,_reject);
       };
-      document.body.appendChild(i);
       (i.contentWindow.document || i.contentDocument).open();
       (i.contentWindow.document || i.contentDocument).write('<!DOCTYPE html><html><head><script type="text/javascript" id="robotjs-script" src="'+origin+'robotjs-polyfill.js"></script></head><body></body></html>');
       (i.contentWindow.document || i.contentDocument).close();
