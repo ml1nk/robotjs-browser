@@ -36,6 +36,9 @@ var serve = {
         },
         "robotjs": {
           "path" : __dirname + "/client/robotjs.js"
+        },
+        "robotjs-iframe": {
+          "path" : __dirname + "/client/robotjs-iframe.js"
         }
     },
     multis : {
@@ -44,11 +47,15 @@ var serve = {
       },
       "robotjs-polyfill" : {
         files : ["socket.io", "setImmediate", "promise", "robotjs"]
+      },
+      "robotjs-iframe-polyfill" : {
+        files : ["setImmediate", "promise", "robotjs-iframe"]
       }
     }
 };
 
 require('./lib/serve-files.js')(app, serve, minify);
+
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/client/index.html');
 });
@@ -56,9 +63,6 @@ app.get('/', function(req, res) {
 server.listen(port, host);
 
 console.log("server:", "started on " + host + ":" + port);
-
-
-
 
 var robot = require("robotjs");
 io.on('connection', function(socket) {

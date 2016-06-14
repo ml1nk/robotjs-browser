@@ -1,6 +1,7 @@
-var robotjs = (function() {
-    var origin = _origin(document.getElementById("robotjs").src);
-    var socket = io(origin);
+var robotjs = (function(_window) {
+
+    var _script = document.getElementById("robotjs-script");
+    var socket = _script ? io(_origin(_script.src)) : io();
 
     var pos = (function() {
 
@@ -31,12 +32,12 @@ var robotjs = (function() {
         }
 
         function _iframe_pos(el, pos) {
-            if (el.ownerDocument !== document) {
-                var list = document.getElementsByTagName("iframe");
+            if (el.ownerDocument !== _window.document) {
+                var list = _window.document.getElementsByTagName("iframe");
                 for (var i = 0; i < list.length; i++) {
                     var doc = list[i].contentDocument || list[i].contentWindow.document;
                     if (el.ownerDocument === doc) {
-                        var pos_outside = _pos(list[i].getBoundingClientRect(), window, "left-top");
+                        var pos_outside = _pos(list[i].getBoundingClientRect(), _window, "left-top");
                         pos.x += pos_outside.x;
                         pos.y += pos_outside.y;
                         break;
@@ -47,20 +48,20 @@ var robotjs = (function() {
 
         function _screen_pos(pos) {
             var border;
-            var devicePixelRatio = _getDevicePixelRatio(window);
+            var devicePixelRatio = _getDevicePixelRatio(_window);
             // firefox ignores decorations (title bar) window.outerWidth / window.outerHeight
             // https://bugzilla.mozilla.org/show_bug.cgi?id=581866
-            if(window.hasOwnProperty("mozInnerScreenY") && window.hasOwnProperty("mozInnerScreenX")) {
-              pos.x += Math.round(devicePixelRatio*window.mozInnerScreenX);
-              pos.y += Math.round(devicePixelRatio*window.mozInnerScreenY);
-            } else if(window.hasOwnProperty("chrome") && window.hasOwnProperty("screen") && !(window.screen.systemXDPI)) {
-              border = Math.round((window.outerWidth - Math.round(window.innerWidth*devicePixelRatio))/2);
-              pos.x += window.screenX + border;
-              pos.y += window.screenY + window.outerHeight - Math.round(window.innerHeight*devicePixelRatio)-border;
+            if(_window.hasOwnProperty("mozInnerScreenY") && _window.hasOwnProperty("mozInnerScreenX")) {
+              pos.x += Math.round(devicePixelRatio*_window.mozInnerScreenX);
+              pos.y += Math.round(devicePixelRatio*_window.mozInnerScreenY);
+            } else if(_window.hasOwnProperty("chrome") && _window.hasOwnProperty("screen") && !(_window.screen.systemXDPI)) {
+              border = Math.round((_window.outerWidth - Math.round(_window.innerWidth*devicePixelRatio))/2);
+              pos.x += _window.screenX + border;
+              pos.y += _window.screenY + _window.outerHeight - Math.round(_window.innerHeight*devicePixelRatio)-border;
             } else {
-              border = Math.round((window.outerWidth - window.innerWidth)*devicePixelRatio/2);
-              pos.x += window.screenX*devicePixelRatio + border;
-              pos.y += window.screenY*devicePixelRatio + Math.round((window.outerHeight - window.innerHeight)*devicePixelRatio)-border;
+              border = Math.round((_window.outerWidth - _window.innerWidth)*devicePixelRatio/2);
+              pos.x += _window.screenX*devicePixelRatio + border;
+              pos.y += _window.screenY*devicePixelRatio + Math.round((_window.outerHeight - _window.innerHeight)*devicePixelRatio)-border;
             }
         }
 
@@ -113,14 +114,14 @@ var robotjs = (function() {
 
     var fullscreen = (function() {
         function is() {
-            var devicePixelRatio = _getDevicePixelRatio(window);
+            var devicePixelRatio = _getDevicePixelRatio(_window);
             // firefox changes window.outerHeight / window.outerWidth when zooming (chrome does not)
             // https://bugzilla.mozilla.org/show_bug.cgi?id=1022006
-            if(window.hasOwnProperty("mozInnerScreenY") && window.hasOwnProperty("mozInnerScreenX")) {
-              return(Math.round(devicePixelRatio*window.mozInnerScreenX)<5 && Math.round(devicePixelRatio*window.mozInnerScreenY)<5);
+            if(_window.hasOwnProperty("mozInnerScreenY") && _window.hasOwnProperty("mozInnerScreenX")) {
+              return(Math.round(devicePixelRatio*_window.mozInnerScreenX)<5 && Math.round(devicePixelRatio*_window.mozInnerScreenY)<5);
             } else {
               // there is always one pixel at the top
-              return (window.screen.height-5 < window.innerHeight*devicePixelRatio && window.screen.width-5 < window.innerWidth*devicePixelRatio);
+              return (_window.screen.height-5 < _window.innerHeight*devicePixelRatio && _window.screen.width-5 < _window.innerWidth*devicePixelRatio);
             }
         }
 
@@ -271,13 +272,27 @@ var robotjs = (function() {
         return ratio;
     }
 
+    function setWindow(window) {
+      _window = window;
+    }
+
+    var started = new Promise(function(fulfill, reject) {
+      socket.on('connect_error', function(){
+        reject();
+      });
+      socket.on('connect', function(){
+        fulfill();
+      });
+    });
+
     return {
         pos: pos,
         fullscreen: fullscreen,
         wrapper: wrapper,
         delay: delay,
         socket: socket,
-        origin: origin
+        setWindow : setWindow,
+        started : started
     };
 
-}());
+}(window));
