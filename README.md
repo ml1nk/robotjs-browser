@@ -1,3 +1,5 @@
+[![npm version](https://badge.fury.io/js/robotjs-browser.svg)](https://badge.fury.io/js/robotjs-browser)
+
 ## Installation
 ```
 npm install -g robotjs-browser
